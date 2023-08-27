@@ -1,25 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import { Router, navigate } from "@reach/router";
 
-function App() {
+import { ProvideNotion } from "./services/notion";
+import { Devices } from "./pages/Devices";
+import { Loading } from "./components/Loading";
+import { Login } from "./pages/Login";
+import { Logout } from "./pages/Logout";
+import { Calm } from "./pages/Calm";
+
+import { useNotion } from "./services/notion";
+
+export function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ProvideNotion>
+      <Routes />
+    </ProvideNotion>
   );
 }
 
-export default App;
+function Routes() {
+  const { user, loadingUser } = useNotion();
+
+  useEffect(() => {
+    if (!loadingUser && !user) {
+      navigate("/login");
+    }
+  }, [user, loadingUser]);
+
+  if (loadingUser) {
+    return <Loading />;
+  }
+
+  return (
+    <Router>
+      <Calm path="/" />
+      <Devices path="/devices" />
+      <Login path="/login" />
+      <Logout path="/logout" />
+    </Router>
+  );
+}
