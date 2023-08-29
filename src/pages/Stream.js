@@ -3,6 +3,7 @@ import { navigate } from "@reach/router";
 import { Line } from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
 import { notion, useNotion } from "../services/notion";
+import { Nav } from "../components/Nav";
 //import { Stream } from "../components/Stream";
 
 export function Stream() {
@@ -13,21 +14,6 @@ export function Stream() {
     if (!user) {
       navigate("/login");
     }
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
-      console.log(brainwaves);
-    });
-
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [user]);
 
   const data = {
@@ -43,28 +29,46 @@ export function Stream() {
     };
 
 
-    const options = {
-    scales: {
-        xAxes: [
-        {
-            type: "realtime",
-            realtime: {
-            onRefresh: function(chart) {
-                data.datasets[0].data.push({
-                x: Date.now(),
-                y: Math.random() * 100
-                });
-            },
-            delay: 2000
-            }
-        }
-        ]
-    }
-    };
+  const options = {
+  scales: {
+      xAxes: [
+      {
+          type: "realtime",
+          realtime: {
+          onRefresh: function(chart) {
+
+            const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
+              // setSignals(sig);
+              // console.log(brainwaves.data[0]);
+              // setSignals();
+              for (let i = 0; i < 8; i++) {
+                // Code to be repeated
+                chart.data.datasets[0].data.push({
+                  x: Date.now(),
+                  y: brainwaves.data[0][i]
+                  });
+              }
+
+
+            });
+            chart.update('quiet');
+
+          },
+          delay: 2000
+          }
+      }
+      ]
+  }
+  };
 
   return (
+
+
+
     <div>
         <Line data={data} options={options} />
     </div>
+
+
   );
 }
