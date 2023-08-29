@@ -7,7 +7,7 @@ import { Loading } from "./components/Loading";
 import { Login } from "./pages/Login";
 import { Logout } from "./pages/Logout";
 import { Calm } from "./pages/Calm";
-
+import { Stream } from "./pages/Stream";
 import { useNotion } from "./services/notion";
 
 export function App() {
@@ -34,6 +34,7 @@ function Routes() {
   return (
     <Router>
       <Calm path="/" />
+      <Stream path='/stream'/>
       <Devices path="/devices" />
       <Login path="/login" />
       <Logout path="/logout" />
