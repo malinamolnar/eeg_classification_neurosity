@@ -121,7 +121,8 @@ export function Stream() {
   return (
 
     <div>
-        <canvas ></canvas>
+        {/* <canvas ></canvas> */}
+        <div>Streaming data</div>
         <Line data={data} options={options} />
     </div>
 

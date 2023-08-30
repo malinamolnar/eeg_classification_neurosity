@@ -9,17 +9,14 @@ export function Footer() {
         target="_blank"
         rel="noopener noreferrer"
       >
-        View source code
       </a>
       <div className="card-footer-credits">
-        Built by{" "}
         <a
           className="card-link"
           href="https://neurosity.co"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Neurosity
         </a>
       </div>
     </footer>

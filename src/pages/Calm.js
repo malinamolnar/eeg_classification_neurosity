@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { navigate } from "@reach/router";
 
 import { notion, useNotion } from "../services/notion";
-import { Nav } from "../components/Nav";
+import { Nav} from "../components/Nav";
+import axios from 'axios';
+
 
 export function Calm() {
   const { user } = useNotion();
@@ -19,26 +21,17 @@ export function Calm() {
       return;
     }
 
-    const subscription = notion.calm().subscribe((calm) => {
-      const calmScore = Math.trunc(calm.probability * 100);
-      setCalm(calmScore);
+    notion.signalQuality().subscribe((signalQuality) => {
+      setCalm(signalQuality[0].status);
     });
 
-    // const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
-    //   console.log(brainwaves);
-    // });
-
-
-    return () => {
-      subscription.unsubscribe();
-    };
   }, [user]);
 
   return (
     <main className="main-container">
       {user ? <Nav /> : null}
       <div className="calm-score">
-        &nbsp;{calm}% <div className="calm-word">Calm</div>
+        &nbsp;{calm} <div className="calm-word">signal quality</div>
       </div>
     </main>
   );

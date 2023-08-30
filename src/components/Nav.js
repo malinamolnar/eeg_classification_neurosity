@@ -9,9 +9,16 @@ export function Nav() {
     navigate("/logout");
   }
 
+  function goToStreaming() {
+    navigate("/stream");
+  }
+
   return (
     <nav className="card">
       <Status />
+      <button onClick={goToStreaming} className="card-btn">
+        Go to streaming
+      </button>
       <button onClick={goToLogout} className="card-btn">
         Logout
       </button>
