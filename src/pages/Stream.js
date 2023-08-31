@@ -5,10 +5,13 @@ import 'chartjs-plugin-streaming';
 import { notion, useNotion } from "../services/notion";
 import { Nav } from "../components/Nav";
 //import { Stream } from "../components/Stream";
+import axios from 'axios';
 
 export function Stream() {
   const { user } = useNotion();
   const [calm, setCalm] = useState(0);
+  const [valenceNeg, setValNeg] = useState(0);
+  const [valencePos, setValPos] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -71,7 +74,68 @@ export function Stream() {
     ]
     };
 
+    var arr = [];
+    // var count = 0;
+    const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
 
+      // count = count + 1;
+      // console.log(count);
+
+      var ts = []
+      for (let step =0; step<8; step++){
+        ts.push(brainwaves.data[step][0]);
+      }
+      arr.push(ts);
+  
+      if (arr.length == 200) {
+
+        const body = {
+              "input_data": [arr]
+            }
+      
+
+        const jsonString = JSON.stringify(body);
+
+        const url = 'https://ml-dissertation.germanywestcentral.inference.ml.azure.com/score'
+        const api_key = 'b6JSyKan6UkZMafdoCHw1DxWWubTeY3B'
+        axios.post(url, jsonString, {headers:{
+          'Content-Type':'application/json',
+          'Authorization': ('Bearer '+ api_key),
+          'azureml-model-deployment':'lstm-cnn-collected-data-model'
+        }
+        }).then(function (response) {
+          setValNeg(response.data[0][0]);
+          setValPos(response.data[0][1]);
+          console.log("Probability for class 0 (negative emotion): ", response.data[0][0]);
+          console.log("Probability for class 1 (positive emotion): ", response.data[0][1]);
+        }).catch(function (error) {
+          console.log(error);
+        });
+
+        // console.log(arr);
+        
+        arr = [];
+      }
+      });
+
+    // var arr = []
+    // const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
+
+    //   while(arr.length < 200) {
+    //     var ts = []
+    //     for (let step =0; step<8; step++){
+    //       ts.push(brainwaves.data[step][0]);
+    //     }
+    //     arr.push(ts);
+    //   }
+    //   if (arr.length == 200) {
+
+    //     arr = [];
+    //   }
+
+    //   });
+
+  
   const options = {
   scales: {
       xAxes: [
@@ -84,29 +148,18 @@ export function Stream() {
           delay: 1000,      // delay of 1000 ms, so upcoming values are known before plotting a line
           pause: false,     // chart is not paused
           ttl: undefined,   // data will be automatically deleted as it disappears off the chart
-          frameRate: 30,    // data points are drawn 30 times every second
+          frameRate: 50,    // data points are drawn 50 times every second
 
           onRefresh: function(chart) {
 
             const subscription = notion.brainwaves("raw").subscribe((brainwaves) => {
 
-              // for (let i = 0; i < 8; i++) {
-              //   // Code to be repeated
-              //   chart.data.datasets[0].data.push({
-              //     x: Date.now(),
-              //     y: brainwaves.data[0][i]
-              //     });
-              // }
             chart.data.datasets.forEach((dataset, index) => {
               dataset.data.push({
                 x: Date.now(),
                 y: brainwaves.data[index][0]  //only the first value from each 6 milliseconds
               })
             });
-            // chart.data.datasets[0].data.push({
-            // x: Date.now(),
-            // y: brainwaves.data[0][0]
-            // });
 
             });
             chart.update('quiet');
@@ -119,12 +172,20 @@ export function Stream() {
   };
 
   return (
+<main>
+        <div>
+        <h3>Streaming EEG signals from Crown Neurosity</h3>
+        <p>Probability for negative valence: {valenceNeg}</p>
+        <p>Probaility for positive valence: {valencePos}</p>
+        </div>
 
-    <div>
+        <div>
         {/* <canvas ></canvas> */}
-        <div>Streaming data</div>
         <Line data={data} options={options} />
     </div>
+
+</main>
+
 
 
   );

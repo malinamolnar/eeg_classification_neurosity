@@ -27,6 +27,8 @@ export function Calm() {
 
   }, [user]);
 
+
+
   return (
     <main className="main-container">
       {user ? <Nav /> : null}
